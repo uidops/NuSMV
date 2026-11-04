@@ -1,0 +1,5 @@
+# Python bytecode produced by scripts/meson-util.py
+__pycache__/
+
+# Meson lock file created next to the wrap files
+subprojects/.wraplock
