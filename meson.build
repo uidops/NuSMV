@@ -41,7 +41,8 @@ with_ltl2smv  = get_option('with-ltl2smv' ).enable_auto_if(build_release).allowe
 with_profiler = get_option('with-profiler')                              .enabled()
 with_watchdog = get_option('with-watchdog')                              .enabled()
 
-build_doc_ft       = get_option('build-doc'      ).enable_auto_if(build_release)
+build_doc_req      = get_option('build-doc'      )
+build_doc_ft       = build_doc_req.enable_auto_if(build_release)
 with_bignumbers_ft = get_option('with-bignumbers')
 with_gtest_ft      = get_option('with-gtest'     )\
   .disable_if(
@@ -199,14 +200,19 @@ create_help_py     = files('code/scripts/create_help.py'    )[0]
 bison = find_program('bison')
 flex  = find_program('flex' )
 
+# Use the raw option here, not build_doc_ft: --buildtype=release turns `auto`
+# into `enabled`, which would make an explicit doxygen/latexmk requirement and
+# abort the configuration on machines without a documentation toolchain, even
+# though the option promises to build the docs only "if doxygen and latexmk are
+# found". Missing tools simply disable the doc targets (they use disablers).
 doxygen = find_program(
   'doxygen',
-  required: build_doc_ft,
+  required: build_doc_req,
   disabler: true,
 )
 latexmk = find_program(
   'latexmk',
-  required: build_doc_ft,
+  required: build_doc_req,
   disabler: true,
 )
 
@@ -488,13 +494,24 @@ run_target(
 
 subdir('doc')
 
-alias_target(
-  'doc',
-  prog_man_html,
-  prog_man_txt,
-  tutorial_pdf,
-  user_man_pdf,
-)
+# Only alias the doc targets that can actually be built: alias_target() with a
+# single disabled target (the doxygen manual when doxygen is missing, the PDFs
+# when latexmk is missing) disables the whole alias, which makes the documented
+# `meson compile doc` fail with "target not found".
+doc_targets = []
+if not is_disabler(doxygen)
+  doc_targets += [prog_man_html, prog_man_txt]
+endif
+if not is_disabler(latexmk)
+  doc_targets += [tutorial_pdf, user_man_pdf]
+endif
+
+if doc_targets.length() > 0
+  alias_target(
+    'doc',
+    doc_targets,
+  )
+endif
 
 
 ### Install #################################################################
