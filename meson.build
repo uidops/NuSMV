@@ -524,6 +524,15 @@ install_subdir(
   'examples',
   install_dir: datadir,
 )
+# The runtime library directory: master.nusmvrc is looked up as
+# <NUSMV_LIBRARY_PATH>/master.nusmvrc (see CInit_NuSMVObtainLibrary and
+# Cmd_Init), so it has to be installed next to contrib/ and examples/,
+# i.e. in <datadir>/nusmv. Without this rule the file only ever existed
+# in the source tree.
+install_subdir(
+  'share/nusmv',
+  install_dir: get_option('datadir'),
+)
 
 pkgconfig = import('pkgconfig')
 pkgconfig.generate(
