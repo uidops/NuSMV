@@ -80,7 +80,7 @@ void
 parser_prob__switch_to_buffer(YY_BUFFER_STATE new_buffer);
 
 YY_BUFFER_STATE 
-parser_prob__create_buffer(FILE* file, int size);
+parser_prob__create_buffer(FILE* file, size_t size);
 
 void parser_prob__delete_buffer(YY_BUFFER_STATE buf);
 

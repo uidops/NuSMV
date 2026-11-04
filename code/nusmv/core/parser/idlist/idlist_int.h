@@ -87,7 +87,7 @@ parser_idlist__switch_to_buffer(YY_BUFFER_STATE new_buffer);
   \todo Missing description
 */
 YY_BUFFER_STATE 
-parser_idlist__create_buffer(FILE* file, int size);
+parser_idlist__create_buffer(FILE* file, size_t size);
 
 /*!
   \brief \todo Missing synopsis
