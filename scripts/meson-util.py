@@ -7,8 +7,6 @@ import os
 import shutil
 import sys
 
-import mesonbuild.mdist
-
 from pathlib import Path
 from typing import Optional
 
@@ -218,6 +216,13 @@ def copytree(
             logger.error(f"source path not relative to MESON_BUILD_ROOT: {src}")
             return False
 
+    if not src.is_dir():
+        # Optional build products (e.g. the doxygen HTML manual) may not have
+        # been built: aborting here would make `meson install` fail even
+        # though everything else was installed fine.
+        logger.warning(f"skip copytree: source directory not built: {src}")
+        return True
+
     dst = Path(args.dst)
     if args.to_install_destdir_prefix:
         if 'MESON_INSTALL_DESTDIR_PREFIX' not in os.environ:
@@ -378,6 +383,10 @@ def make_pack(
                 if not dry_run:
                     logger.info(f"made archive {pkg_name}")
                     print(f"Created {pkg_name}")
+                    # Imported lazily: only `pack` needs mesonbuild, and the
+                    # install scripts run under plain `python`, which is not
+                    # necessarily the interpreter meson runs under.
+                    import mesonbuild.mdist
                     mesonbuild.mdist.create_hash(pkg_name)
     except NotADirectoryError as e:
         logger.info(f"skip archive creation: {e}")
