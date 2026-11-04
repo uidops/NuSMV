@@ -10,7 +10,11 @@ darwin = host_machine.system() == 'darwin'
 unix   = linux or darwin
 
 cc = meson.get_compiler('c')
-cc_unistd_h        = cc.check_header('unistd.h').to_string('1', '0')
+# Use has_header (preprocessor-only) rather than check_header (full compile):
+# the latter fails when CFLAGS contain driver-only options such as
+# -fuse-ld=lld, which make meson's compile sanity check bail out with
+# -Werror=unused-command-line-argument. See also code/meson.build.
+cc_unistd_h        = cc.has_header('unistd.h').to_string('1', '0')
 cc_sizeof_int      = cc.sizeof('int')           .to_string()
 cc_sizeof_long_int = cc.sizeof('long int')      .to_string()
 cc_sizeof_void_ptr = cc.sizeof('void *')        .to_string()
