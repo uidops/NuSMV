@@ -101,7 +101,7 @@ YY_BUFFER_STATE psl_yy_scan_buffer(char *base, size_t size);
 
   \todo Missing description
 */
-YY_BUFFER_STATE psl_yy_create_buffer(FILE *file, size_t size);
+YY_BUFFER_STATE psl_yy_create_buffer(FILE *file, NUSMV_FLEX_BUFFER_SIZE_T size);
 
 /*!
   \brief \todo Missing synopsis

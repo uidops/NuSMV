@@ -75,6 +75,8 @@ typedef struct Slist_TAG* Slist_ptr;
 
   \todo Missing description
 */
+#include <sys/queue.h>
+#undef SLIST_FOREACH
 #define SLIST_FOREACH(list, iter)                               \
    for (iter=Slist_first(list); !Siter_is_end(iter); \
         iter=Siter_next(iter))

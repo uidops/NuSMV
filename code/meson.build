@@ -107,6 +107,8 @@ cfg.set10('NUSMV_HAVE_SAT_SOLVER'          , libminisat_dep .found())
 cfg.set10('NUSMV_HAVE_SOLVER_MINISAT'      , libminisat_dep .found())
 cfg.set10('NUSMV_HAVE_WATCHDOG_LIBRARY'    , with_watchdog          )
 cfg.set10('NUSMV_HAVE_WINEDITLINE'         , with_wineditline       )
+cfg.set  ('NUSMV_FLEX_BUFFER_SIZE_T'        , flex_buffer_size_type  )
+cfg.set  ('NUSMV_EDITLINE_HEADER'          , f'<@editline_header@>' )
 
 ## Others
 addons = []

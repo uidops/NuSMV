@@ -131,11 +131,11 @@ char* strncpy(char*, const char*, size_t);
 #endif
 
 #if NUSMV_HAVE_LIBEDIT
-#  include <readline.h>
+#  include NUSMV_EDITLINE_HEADER
 #elif NUSMV_HAVE_WINEDITLINE
 #  define _WINDOWS_ /* Avoid <windows.h> from editline/readline.h because it
                        re-defines our `booloean` as `unsigned char` */
-#  include <readline.h>
+#  include NUSMV_EDITLINE_HEADER
 #endif
 
 /* Some files need to call popen() and pclose() but their names are different on MSVC */

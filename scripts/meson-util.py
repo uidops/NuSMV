@@ -305,6 +305,7 @@ def fix_symlinks(
 
 FORMAT_DEFAULT = {
     'cygwin' : 'xztar',
+    'openbsd': 'xztar',
     'darwin' : 'xztar',
     'linux'  : 'xztar',
     'windows': 'zip'  ,
@@ -312,6 +313,7 @@ FORMAT_DEFAULT = {
 
 SYSTEMS = {
     'cygwin' : 'linux64',
+    'openbsd': 'openbsd',
     'darwin' : 'macosx' ,
     'linux'  : 'linux64',
     'windows': 'win64'  ,

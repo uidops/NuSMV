@@ -78,7 +78,7 @@ void
 parser_ap__switch_to_buffer(YY_BUFFER_STATE new_buffer);
 
 YY_BUFFER_STATE 
-parser_ap__create_buffer(FILE* file, size_t size);
+parser_ap__create_buffer(FILE* file, NUSMV_FLEX_BUFFER_SIZE_T size);
 
 void parser_ap__delete_buffer(YY_BUFFER_STATE buf);
 

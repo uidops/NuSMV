@@ -77,7 +77,7 @@ linux   = host_machine.system() == 'linux'
 cygwin  = host_machine.system() == 'cygwin'
 darwin  = host_machine.system() == 'darwin'
 windows = host_machine.system() == 'windows'
-unix    = linux or cygwin or darwin
+unix    = not windows
 
 ## C
 cc = meson.get_compiler('c')
@@ -164,10 +164,54 @@ libgtest_main_dep = dependency(
 # editline
 libeditline_dep = dependency(
   'libedit', 'wineditline',
-  required: with_shell_ft,
+  required: false,
 )
-with_libedit     = libeditline_dep.name() == 'libedit'
-with_wineditline = libeditline_dep.name() == 'wineditline'
+# Header providing the readline() API; pkg-config's cflags point inside the
+# editline include folder, hence the bare name.
+editline_header = 'readline.h'
+if not libeditline_dep.found() and not with_shell_ft.disabled()
+  # BSD base systems (e.g., OpenBSD) ship libedit without a pkg-config file:
+  # look for the library and its readline-compatible header directly.
+  libedit_lib = cc.find_library('edit', required: false)
+  if libedit_lib.found()
+    # libedit needs a terminal library, which a static or unrecorded
+    # dependency would not pull in by itself.
+    libedit_deps = [libedit_lib]
+    foreach term : ['curses', 'ncurses', 'termcap', 'tinfo']
+      term_lib = cc.find_library(term, required: false)
+      if term_lib.found()
+        libedit_deps += term_lib
+        break
+      endif
+    endforeach
+    foreach h : ['editline/readline.h', 'readline/readline.h', 'readline.h']
+      if cc.links(
+          f'''#include <stdio.h>
+              #include <@h@>
+              int main(void) {
+                rl_attempted_completion_function = 0;
+                return rl_completion_matches("", 0) == 0
+                    && readline("") == 0;
+              }''',
+          dependencies: libedit_deps,
+          name: f'libedit through <@h@>',
+        )
+        editline_header = h
+        libeditline_dep = declare_dependency(dependencies: libedit_deps)
+        break
+      endif
+    endforeach
+  endif
+endif
+if with_shell_ft.enabled() and not libeditline_dep.found()
+  error(
+    'Dependency libedit (or wineditline) not found, required by option'+
+    ' with-shell (enabled by default and by --buildtype=release).'+
+    ' Install libedit, or configure with -Dwith-shell=disabled.'
+  )
+endif
+with_wineditline = libeditline_dep.found() and libeditline_dep.name() == 'wineditline'
+with_libedit     = libeditline_dep.found() and not with_wineditline
 
 # regex
 if cc.has_function('regcomp')
@@ -199,6 +243,18 @@ create_help_py     = files('code/scripts/create_help.py'    )[0]
 ## External Programs
 bison = find_program('bison')
 flex  = find_program('flex' )
+
+# Type of the `size` parameter of yy_create_buffer(), which the parser headers
+# re-declare: `int` with flex 2.5.x (e.g., OpenBSD base), `yy_size_t` (i.e.,
+# `size_t`) with newer or patched versions (e.g., macOS).
+flex_buffer_size_type = run_command(
+  python, files('scripts/flex-buffer-size-type.py'), flex,
+  capture: true,
+  check: true,
+).stdout().strip()
+summary('flex yy_create_buffer size type', flex_buffer_size_type,
+  section: 'Environment',
+)
 
 # Use the raw option here, not build_doc_ft: --buildtype=release turns `auto`
 # into `enabled`, which would make an explicit doxygen/latexmk requirement and
